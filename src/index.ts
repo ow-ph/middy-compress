@@ -1,13 +1,13 @@
-const compress = (config: compressConfig) => {
-  return ({
-    after:(handler: any, next: any)=>{
+const compress = (config: ICompressConfig) => {
+  return {
+    after: (handler: any, next: any) => {
       next();
-    }
-  })
-}
+    },
+  };
+};
 
-export {compress};
+export { compress };
 
-export type compressConfig = {
-  ignoreAcceptEncodingHeader?: boolean
+export interface ICompressConfig {
+  ignoreAcceptEncodingHeader?: boolean;
 }
