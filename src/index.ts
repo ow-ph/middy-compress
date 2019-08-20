@@ -2,7 +2,7 @@ import middy from 'middy';
 import {gzip} from 'node-gzip';
 
 const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | undefined) => {
-  const defaultLogger = (data:any) => { };
+  const defaultLogger = (data:any) => { return };
   const logger = (config && config.logger) || defaultLogger;
   return {
     after: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
@@ -43,7 +43,27 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
   };
 };
 
-export { compress };
+const base64Decode: middy.Middleware<ICompressConfig> = (config: ICompressConfig | undefined) => {
+  const defaultLogger = (data:any) => { return };
+  const logger = (config && config.logger) || defaultLogger;
+  return {
+
+
+    before: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
+      if (handler.event.isBase64Encoded && handler.event.body) {
+        logger('middy-base64decode::before - decoding base64');
+
+        const buff = new Buffer(handler.event.body, 'base64');
+        handler.event.body = buff.toString('ascii');
+      }
+
+      next();
+    },
+
+  };
+};
+
+export { compress, base64Decode };
 
 export interface ICompressConfig {
   ignoreAcceptEncodingHeader?: boolean;
