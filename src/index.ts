@@ -14,6 +14,15 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
         })
         .catch(err=>next(err));
     },
+
+    before: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
+      if (handler.event.isBase64Encoded && handler.event.body) {
+        const buff = new Buffer(handler.event.body, 'base64');
+        handler.event.body = buff.toString('ascii');
+      }
+
+      next();
+    },
   };
 };
 
