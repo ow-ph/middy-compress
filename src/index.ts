@@ -8,6 +8,8 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
         .then(response=>{
           handler.response.body = response.toString('base64');
           handler.response.isBase64Encoded = true;
+          handler.response.headers = handler.response.headers || {};
+          handler.response.headers["Content-Encoding"] = "gzip";
           next();
         })
         .catch(err=>next(err));
