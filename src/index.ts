@@ -13,9 +13,11 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
       }
       gzip(handler.response.body)
         .then(response=>{
+          handler.response = handler.response || {}
+          handler.response.headers = handler.response.headers || {}
+
           handler.response.body = response.toString('base64');
           handler.response.isBase64Encoded = true;
-          handler.response.headers = handler.response.headers || {};
           handler.response.headers["Content-Encoding"] = "gzip";
 
           logger('middy-compress::after - content g zipped');
@@ -25,19 +27,38 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
         .catch(err=> {
           logger('middy-compress::after - error');
           logger(err);
-          next(err)
+          next()
         });
     },
+    
+    
+    onError: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
 
-    before: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
-      if (handler.event.isBase64Encoded && handler.event.body) {
-        logger('middy-compress::before - decoding base64');
-
-        const buff = new Buffer(handler.event.body, 'base64');
-        handler.event.body = buff.toString('ascii');
+      if (!handler.response.body){
+        logger('middy-compress::onerror - no body to gzip');
+        next(handler.error);
+        return;
       }
+      console.log(JSON.stringify(handler.response))
+      gzip(handler.response.body)
+        .then(response=>{
 
-      next();
+          handler.response = handler.response || {}
+          handler.response.headers = handler.response.headers || {}
+
+          handler.response.body = response.toString('base64');
+          handler.response.isBase64Encoded = true;
+          handler.response.headers["Content-Encoding"] = "gzip";
+
+          logger('middy-compress::onerror - content g zipped');
+
+          next(handler.error);
+        })
+        .catch(err=> {
+          logger('middy-compress::onerror - error');
+          logger(err);
+          next(handler.error)
+        });
     },
 
   };
