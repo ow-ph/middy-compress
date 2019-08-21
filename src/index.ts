@@ -9,7 +9,7 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
   const zlibConfig = config && config.zlibConfig || {};
   return {
     after: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
-      if (!handler.response.body){
+      if (!handler.response || !handler.response.body){
         logger('middy-compress::after - no body to gzip');
         next();
         return;
@@ -37,7 +37,7 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
     
     onError: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
 
-      if (!handler.response.body){
+      if ( !handler.response || !handler.response.body ){
         logger('middy-compress::onerror - no body to gzip');
         next(handler.error);
         return;

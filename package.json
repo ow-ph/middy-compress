@@ -1,6 +1,6 @@
 {
   "name": "middy-compress",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A middy middleware that make gzip compress response",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
