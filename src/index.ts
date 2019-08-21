@@ -1,9 +1,12 @@
 import middy from 'middy';
 import {gzip} from 'node-gzip';
+import { ZlibOptions } from 'zlib';
 
 const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | undefined) => {
   const defaultLogger = (data:any) => { return };
   const logger = (config && config.logger) || defaultLogger;
+
+  const zlibConfig = config && config.zlibConfig || {};
   return {
     after: (handler:middy.HandlerLambda<any,any>, next: middy.NextFunction) => {
       if (!handler.response.body){
@@ -11,7 +14,7 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
         next();
         return;
       }
-      gzip(handler.response.body)
+      gzip(handler.response.body, zlibConfig)
         .then(response=>{
           handler.response = handler.response || {}
           handler.response.headers = handler.response.headers || {}
@@ -39,7 +42,7 @@ const compress: middy.Middleware<ICompressConfig> = (config: ICompressConfig | u
         next(handler.error);
         return;
       }
-      gzip(handler.response.body)
+      gzip(handler.response.body, zlibConfig)
         .then(response=>{
 
           handler.response = handler.response || {}
@@ -88,5 +91,6 @@ export { compress, base64Decode };
 export interface ICompressConfig {
   ignoreAcceptEncodingHeader?: boolean;
   verbose?: boolean;
-  logger?: (args:any)=>void
+  logger?: (args:any)=>void,
+  zlibConfig?: ZlibOptions
 }
